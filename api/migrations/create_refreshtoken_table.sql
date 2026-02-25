@@ -1,0 +1,5 @@
+CREATE TABLE refreshtoken (
+  id SERIAL PRIMARY KEY,
+  token TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

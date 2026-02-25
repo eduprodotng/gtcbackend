@@ -1,0 +1,12 @@
+CREATE TABLE billing_methods (
+  id SERIAL PRIMARY KEY,
+  user_id SERIAL,
+  card_number SERIAL NOT NULL,
+  expiry_date VARCHAR(20) NOT NULL,
+  cvv VARCHAR(5) NOT NULL,
+  address TEXT NOT NULL,
+  city VARCHAR(300) NOT NULL,
+  postal_code VARCHAR(30),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

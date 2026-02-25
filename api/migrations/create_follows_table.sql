@@ -1,0 +1,7 @@
+CREATE TABLE follows (
+  id SERIAL PRIMARY KEY,
+  following_id SERIAL,
+  follower_id SERIAL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

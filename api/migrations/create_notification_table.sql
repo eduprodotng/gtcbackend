@@ -1,0 +1,9 @@
+CREATE TABLE notifications (
+  id SERIAL PRIMARY KEY,
+  user_id SERIAL,
+  title VARCHAR(500) NOT NULL,
+  description TEXT NOT NULL,
+  mark_as_seen VARCHAR(5) NOT NULL DEFAULT 'NO',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

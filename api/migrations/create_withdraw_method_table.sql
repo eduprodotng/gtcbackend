@@ -1,0 +1,9 @@
+CREATE TABLE withdrawal_methods (
+  id SERIAL PRIMARY KEY,
+  user_id SERIAL NOT NULL,
+  bank_name VARCHAR(255) NOT NULL,
+  account_number VARCHAR(100) NOT NULL,
+  account_name VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
