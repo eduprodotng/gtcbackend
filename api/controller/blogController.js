@@ -15,14 +15,37 @@ const mongoDate = new Date(); // Replace with your actual date value
 // };
 
 export const createBlog = async (req, res, next) => {
-  const newProperties = new Blog(req.body);
+  const newBlog = new Blog(req.body);
+  newBlog.slug = req.body.title.toLowerCase().replace(/\s+/g, "-");
 
-  // Generate slug from title
-  newProperties.slug = req.body.title.toLowerCase().replace(/\s+/g, "-");
+  // Capture S3 image URL if uploaded
+  if (req.file) {
+    newBlog.image = req.file.location;
+  }
 
   try {
-    const savedProperties = await newProperties.save();
-    res.status(200).json(savedProperties);
+    const saved = await newBlog.save();
+    res.status(200).json(saved);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateBlog = async (req, res, next) => {
+  try {
+    const updateData = { ...req.body };
+
+    // Update image if a new one was uploaded
+    if (req.file) {
+      updateData.image = req.file.location;
+    }
+
+    const updated = await Blog.findByIdAndUpdate(
+      req.params.id,
+      { $set: updateData },
+      { new: true }
+    );
+    res.status(200).json(updated);
   } catch (err) {
     next(err);
   }
@@ -35,18 +58,7 @@ export const getPropertiesBySlug = async (req, res, next) => {
     next(err);
   }
 };
-export const updateBlog = async (req, res, next) => {
-  try {
-    const updatedProperties = await Blog.findByIdAndUpdate(
-      req.params.id,
-      { $set: req.body },
-      { new: true }
-    );
-    res.status(200).json(updatedProperties);
-  } catch (err) {
-    next(err);
-  }
-};
+
 export const deleteBlog = async (req, res, next) => {
   try {
     await Blog.findByIdAndDelete(req.params.id);
