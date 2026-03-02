@@ -32,6 +32,7 @@ app.use(express.urlencoded({ extended: true }));
 const corsOptions = {
   origin: [
     "http://localhost:3001",
+    "http://localhost:3000",
     "http://localhost:3002",
     "https://www.clarionglobalenergy.com",
     "http://localhost:3000",

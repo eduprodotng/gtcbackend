@@ -1078,32 +1078,41 @@ const getAuthenticatedUserProfile = async (req, res) => {
 //   }
 // };
 
-const login = async (req, res) => {
+ const login = async (req, res) => {
   const { identifier, password } = req.body;
 
   try {
+    // Find the user by email or username
     const user = await User.findOne({
       $or: [{ email: identifier }, { username: identifier }],
-    });
+    }).exec();
 
     console.log("User found:", user);
 
     if (!user) {
+      console.log("User not found");
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    const isPasswordValid = bcrypt.compareSync(password, user.password);
-    console.log("Password valid:", isPasswordValid);
+    // Log the provided password and the stored hashed password
+    console.log("Password provided by user:", password);
+    console.log("Stored hashed password for user:", user.password);
+
+    // Compare provided password with hashed password
+    const isPasswordValid = bcrypt.compareSync(password, user.password); // Using compareSync for logging consistency
+    console.log("Password validation result:", isPasswordValid);
 
     if (!isPasswordValid) {
+      console.log("Invalid password for user:", identifier);
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "12h" }
-    );
+    const role = user.role;
+
+    // Generate a token if the password is correct
+    const token = jwt.sign({ user, role }, process.env.JWT_SECRET, {
+      expiresIn: "12h",
+    });
 
     return res.status(200).json({ token, user });
   } catch (error) {
