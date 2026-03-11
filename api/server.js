@@ -1,3 +1,4 @@
+// VERCEL-COMPATIBLE SERVER — exports app instead of calling app.listen()
 const dotenv = require("dotenv");
 dotenv.config();
 const cors = require("cors");
@@ -79,8 +80,13 @@ process.on("unhandledRejection", (reason, promise) => {
   console.error("Unhandled Rejection at:", promise, "reason:", reason);
 });
 
-const PORT = process.env.PORT || 8002;
+// ── IMPORTANT: Export for Vercel (no app.listen!) ────────────────────────────
+// Vercel is serverless. It calls your app as a function, not a running server.
+// app.listen() is silently IGNORED on Vercel — this is why CORS never ran!
+module.exports = app;
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Only listen when running locally with `node server.js`
+if (require.main === module) {
+  const PORT = process.env.PORT || 8002;
+  app.listen(PORT, () => console.log(`Local server running on port ${PORT}`));
+}
