@@ -3,10 +3,8 @@ dotenv.config();
 const cors = require("cors");
 const express = require("express");
 const passport = require("passport");
-const session = require("express-session");
 const path = require("path");
 
-const MongoStore = require("connect-mongo");
 const connectDB = require("./config/db2");
 
 const authRoute = require("./routes/authRoute");
@@ -21,36 +19,48 @@ const aiRoute = require("./routes/aiRoute");
 console.log("KEY:", JSON.stringify(process.env.AWS_ACCESS_KEY_ID));
 console.log("SECRET:", JSON.stringify(process.env.AWS_SECRET_ACCESS_KEY));
 console.log("REGION:", JSON.stringify(process.env.AWS_REGION));
-// console.log("DATABASE_URL from .env:", process.env.DATABASE_URL);
+
 const app = express();
 connectDB();
-app.use(express.json());
-// app.use(express.json({ limit: "50gb" }));
-app.use(express.urlencoded({ extended: true }));
 
-// Configure CORS
+// ── CORS — must come BEFORE everything else ──────────────────────────────────
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "http://localhost:3002",
+  "http://localhost:5173",
+  "https://gtclagos.edupro.com.ng",
+  "https://clarionglobalenergy.com",        // without www
+  "https://www.clarionglobalenergy.com",    // with www
+];
+
 const corsOptions = {
-  origin: [
-    "http://localhost:3001",
-    "http://localhost:3000",
-    "http://localhost:3002",
-    "https://www.clarionglobalenergy.com",
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "https://gtclagos.edupro.com.ng",
-  ], // specify your client's URL
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, Postman, server-to-server)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn("CORS blocked origin:", origin);
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-API-Key", "X-Api-Key"],
   credentials: true,
 };
 
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
+app.options("*", cors(corsOptions)); // handle all preflight OPTIONS requests
 
+// ── Body parsers ─────────────────────────────────────────────────────────────
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+// ── Passport ─────────────────────────────────────────────────────────────────
 app.use(passport.initialize());
-// app.use(passport.session());
 
+// ── Routes ───────────────────────────────────────────────────────────────────
 app.use("/api/auth", authRoute);
 app.use("/api/", blogRoute);
 app.use("/api/section", sectionRoute);
@@ -60,7 +70,7 @@ app.use("/api/subject", subRoute);
 app.use("/api/", psyRoute);
 app.use("/api/ai", aiRoute);
 
-// Use commonRouter with specific routes requiring authentication
+// ── Error handling ────────────────────────────────────────────────────────────
 process.on("uncaughtException", (err) => {
   console.error("Uncaught Exception:", err);
 });
@@ -71,6 +81,6 @@ process.on("unhandledRejection", (reason, promise) => {
 
 const PORT = process.env.PORT || 8002;
 
-app.listen(PORT, "127.0.0.1", () => {
+app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
