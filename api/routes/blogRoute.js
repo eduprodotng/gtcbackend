@@ -60,7 +60,7 @@ const upload = multer({
 });
 
 // CREATE
-router.post("/blog", upload.single("image"), createBlog);
+router.post("/all-blog", upload.single("image"), createBlog);
 
 router.get("/find/blog/:id", getBlog);
 router.get("/blog/find-by-slug/:slug", getBlogBySlug);
